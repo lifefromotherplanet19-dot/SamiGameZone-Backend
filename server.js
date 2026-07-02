@@ -4,8 +4,10 @@ const jwt = require("jsonwebtoken");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+app.use(cors({
+  origin: "https://sami-game-zone.vercel.app",
+  credentials: true
+}));
 
 const SECRET = "samigamezone_secret_key";
 
