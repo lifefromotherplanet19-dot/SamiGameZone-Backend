@@ -43,7 +43,8 @@ app.post("/api/auth/login", (req, res) => {
 });
 
 // Get Games
-app.get("/api/games", (req, res) => {
+app.get("/api/games", async (req, res) => {
+  const games = await Game.find();
   res.json(games);
 });
 
