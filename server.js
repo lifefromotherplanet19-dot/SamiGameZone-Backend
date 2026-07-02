@@ -8,7 +8,6 @@ app.use(cors({
   origin: "https://sami-game-zone.vercel.app",
   credentials: true
 }));
-
 const SECRET = "samigamezone_secret_key";
 
 // Admin Account
