@@ -75,9 +75,81 @@ app.get('/api/games', (req, res) => res.json(readGames()));
 
 app.post('/api/games', auth, upload.single('image'), (req, res) => {
   const games = readGames();
-  app.post('/api/games', auth, upload.single('image'), (req, res) => {
-  const games = readGames();
+  const imageUrl = req.files?.image
+  ? `https://samigamezone-backend-2.onrender.com/uploads/${req.files.image[0].filename}`
+  : req.body.imageUrl || '';
 
+const gameFileUrl = req.files?.gamefile
+  ? `https://samigamezone-backend-2.onrender.com/gamefiles/${req.files.gamefile[0].filename}`
+  : '';
+  const game = {
+    id: Date.now().toString(),
+    title: req.body.title,
+    description: req.body.description,
+    size: req.body.size || '',
+    downloadLink: req.body.downloadLink,
+    imageUrl,
+    category: req.body.category,
+    createdAt: new Date().toISOString()
+  };
+  const games = readGames();
+  const game = games.find(g => g.id === req.params.id);
+  if (game?.imageUrl?.includes('/uploads/')) {
+    const filename = game.imageUrl.split('/uploads/')[1];
+    const filePath = path.join(UPLOADS_DIR, filename);
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+  }
+  writeGames(games.filter(g => g.id !== req.params.id));
+  res.json({ message: '✅ Deleted!' });
+});
+
+// ================= 📰 NEWS API =================
+app.get('/api/news', (req, res) => res.json(readNews()));
+
+app.post('/api/news', auth, (req, res) => {
+  const news = readNews();
+  const item = {
+    id: Date.now().toString(),
+    title: req.body.title,
+    content: req.body.content,
+    createdAt: new Date().toISOString()
+  };
+  news.unshift(item);
+  writeNews(news);
+  res.status(201).json({ message: '✅ News added!', item });
+});
+
+app.delete('/api/news/:id', auth, (req, res) => {
+  writeNews(readNews().filter(n => n.id !== req.params.id));
+  res.json({ message: '✅ News deleted!' });
+});
+
+// ================= 🔐 AUTH =================
+app.post('/api/auth/login', async (req, res) => {
+  const user = readUsers().find(u => u.email === req.body.email);
+  if (!user || !await bcrypt.compare(req.body.password, user.password)) {
+    return res.status(401).json({ message: '❌ Username ወይም Password ትክክል አይደለም!' });
+  }
+  const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '24h' });
+  res.json({ status: 'success', token });
+});
+
+app.post('/api/auth/register', (req, res) => {
+  res.status(403).json({ message: '❌ Registration disabled!' });
+});
+
+// ================= 🚀 START =================
+app.post('/api/auth/register', (req, res) => {
+  res.status(403).json({
+    message: '❌ Registration disabled!'
+  });
+});
+
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
   const imageUrl = req.file
     ? `https://samigamezone-backend-2.onrender.com/uploads/${req.file.filename}`
     : (req.body.imageUrl || '');
