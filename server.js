@@ -75,9 +75,32 @@ app.get('/api/games', (req, res) => res.json(readGames()));
 
 app.post('/api/games', auth, upload.single('image'), (req, res) => {
   const games = readGames();
-  const imageUrl = req.files?.image
-  ? `https://samigamezone-backend-2.onrender.com/uploads/${req.files.image[0].filename}`
-  : req.body.imageUrl || '';
+  app.post('/api/games', auth, upload.single('image'), (req, res) => {
+  const games = readGames();
+
+  const imageUrl = req.file
+    ? `https://samigamezone-backend-2.onrender.com/uploads/${req.file.filename}`
+    : (req.body.imageUrl || '');
+
+  const game = {
+    id: Date.now().toString(),
+    title: req.body.title,
+    description: req.body.description,
+    size: req.body.size || '',
+    downloadLink: req.body.downloadLink,
+    imageUrl,
+    category: req.body.category,
+    createdAt: new Date().toISOString()
+  };
+
+  games.push(game);
+  writeGames(games);
+
+  res.status(201).json({
+    message: '✅ Game added!',
+    game
+  });
+});
 
 const gameFileUrl = req.files?.gamefile
   ? `https://samigamezone-backend-2.onrender.com/gamefiles/${req.files.gamefile[0].filename}`
