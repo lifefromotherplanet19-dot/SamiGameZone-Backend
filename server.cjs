@@ -123,7 +123,23 @@ app.post('/api/games/:id/download', (req,res) => {
   writeGames(games);
   res.json({downloads: game.downloads});
 });
-
+// ✏️ Edit Game
+app.put('/api/games/:id', auth, (req, res) => {
+  const games = readGames();
+  const index = games.findIndex(g => g.id === req.params.id);
+  if (index === -1) return res.status(404).json({ message: 'Game not found!' });
+  games[index] = {
+    ...games[index],
+    title: req.body.title || games[index].title,
+    description: req.body.description || games[index].description,
+    size: req.body.size || games[index].size,
+    downloadLink: req.body.downloadLink || games[index].downloadLink,
+    imageUrl: req.body.imageUrl || games[index].imageUrl,
+    category: req.body.category || games[index].category,
+  };
+  writeGames(games);
+  res.json({ message: '✅ Game updated!', game: games[index] });
+});
 app.delete('/api/games/:id', auth, (req,res) => {
   const games = readGames();
   const g = games.find(x => x.id===req.params.id);
