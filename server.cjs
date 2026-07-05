@@ -181,7 +181,27 @@ app.post('/api/news', auth, imageUpload.single('image'), (req, res) => {
   writeNews(news);
   res.status(201).json({ message: '✅ News added!', item });
 });
+// 👁️ View Counter
+app.post('/api/games/:id/view', (req, res) => {
+  const games = readGames();
+  const game = games.find(g => g.id === req.params.id);
+  if (game) {
+    game.views = (game.views || 0) + 1;
+    writeGames(games);
+    res.json({ views: game.views });
+  } else res.status(404).json({ message: 'Not found' });
+});
 
+// ⬇️ Download Counter
+app.post('/api/games/:id/download', (req, res) => {
+  const games = readGames();
+  const game = games.find(g => g.id === req.params.id);
+  if (game) {
+    game.downloads = (game.downloads || 0) + 1;
+    writeGames(games);
+    res.json({ downloads: game.downloads });
+  } else res.status(404).json({ message: 'Not found' });
+});
 app.delete('/api/news/:id', auth, (req, res) => {
   const news = readNews();
   const item = news.find(n => n.id === req.params.id);
